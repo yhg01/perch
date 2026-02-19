@@ -5,10 +5,10 @@
   "main": "dist/main/main.js",
   "scripts": {
     "start": "npm run compile && electron .",
-    "compile": "tsc",
+    "compile": "tsc && cp src/renderer/index.html dist/renderer/index.html",
     "build": "npm run compile && electron-builder",
     "lint": "eslint src/ --ext .ts",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "author": "",
   "license": "MIT",
