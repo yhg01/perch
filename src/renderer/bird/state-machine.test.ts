@@ -52,9 +52,9 @@ describe('BirdStateMachine', () => {
       expect(sm.canTransition('idle')).toBe(false);
     });
 
-    it('does not allow sleeping -> nudging', () => {
+    it('allows sleeping -> nudging', () => {
       sm.transition('sleeping', 'test');
-      expect(sm.canTransition('nudging')).toBe(false);
+      expect(sm.canTransition('nudging')).toBe(true);
     });
 
     it('allows sleeping -> idle', () => {
@@ -87,7 +87,7 @@ describe('BirdStateMachine', () => {
 
     it('returns false for invalid transitions', () => {
       sm.transition('sleeping', 'test');
-      const result = sm.transition('nudging', 'test');
+      const result = sm.transition('happy', 'test');
       expect(result).toBe(false);
       expect(sm.getCurrentState()).toBe('sleeping');
     });
@@ -133,7 +133,7 @@ describe('BirdStateMachine', () => {
       sm.transition('sleeping', 'test');
       callback.mockClear();
 
-      sm.transition('nudging', 'test'); // invalid from sleeping
+      sm.transition('happy', 'test'); // invalid from sleeping
 
       expect(callback).not.toHaveBeenCalled();
     });

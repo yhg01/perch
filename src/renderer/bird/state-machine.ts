@@ -7,9 +7,9 @@ type TransitionCallback = (transition: BirdStateTransition) => void;
  */
 const VALID_TRANSITIONS: Record<BirdState, ReadonlySet<BirdState>> = {
   idle: new Set<BirdState>(['sleeping', 'alert', 'nudging', 'happy', 'sad', 'idle']),
-  sleeping: new Set<BirdState>(['idle', 'alert']),
-  alert: new Set<BirdState>(['idle', 'nudging', 'happy']),
-  nudging: new Set<BirdState>(['idle', 'happy', 'alert']),
+  sleeping: new Set<BirdState>(['idle', 'alert', 'nudging']),
+  alert: new Set<BirdState>(['idle', 'sleeping', 'nudging', 'happy']),
+  nudging: new Set<BirdState>(['idle', 'sleeping', 'happy', 'alert']),
   happy: new Set<BirdState>(['idle', 'sleeping', 'alert']),
   sad: new Set<BirdState>(['idle', 'happy']),
 };
