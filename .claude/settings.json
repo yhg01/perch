@@ -1,0 +1,120 @@
+{
+  "permissions": {
+    "allowedTools": [
+      "Read",
+      "Write",
+      "Edit",
+      "MultiEdit",
+      "Glob",
+      "Grep",
+      "LS",
+      "Task",
+      "WebSearch",
+      "WebFetch",
+      "Bash(git *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(node *)",
+      "Bash(tsc *)",
+      "Bash(eslint *)",
+      "Bash(prettier *)",
+      "Bash(cat *)",
+      "Bash(ls *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(echo *)",
+      "Bash(pwd)",
+      "Bash(which *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(sed *)",
+      "Bash(chmod *)",
+      "Bash(touch *)",
+      "Bash(electron *)",
+      "Bash(electron-builder *)"
+    ],
+    "deny": [
+      // --- Your existing ones (keep all of these) ---
+      "Bash(sudo *)",
+      "Bash(su *)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(ssh *)",
+      "Bash(scp *)",
+      "Bash(brew *)",
+      "Bash(pip *)",
+      "Bash(open *)",
+      "Bash(osascript *)",
+      "Bash(kill *)",
+      "Bash(killall *)",
+      "Bash(shutdown *)",
+      "Bash(reboot *)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(~/.ssh/*)",
+      "Read(~/.aws/*)",
+      "Write(~/.ssh/*)",
+      "Write(~/.aws/*)",
+    
+      // --- ADD THESE ---
+    
+      // Prevent deleting your safety files
+      "Bash(rm *CLAUDE.md*)",
+      "Bash(rm *PRD.md*)",
+      "Bash(rm *PROGRESS.md*)",
+      "Bash(rm *settings.json*)",
+    
+      // Prevent destructive git operations
+      "Bash(git push --force*)",
+      "Bash(git clean -fd*)",
+      "Bash(git reset --hard*)",
+    
+      // Prevent writing outside project
+      "Write(~/*)",
+      "Write(/tmp/*)",
+      "Write(/etc/*)",
+      "Write(/usr/*)",
+    
+      // Prevent reading sensitive macOS stuff
+      "Read(~/Library/Keychains/*)",
+      "Read(~/Library/Cookies/*)",
+      "Read(~/.gnupg/*)",
+      "Read(~/.npmrc)",
+      "Read(~/.gitconfig)",
+    
+      // Prevent process/system abuse
+      "Bash(pkill *)",
+      "Bash(nohup *)",
+      "Bash(crontab *)",
+      "Bash(launchctl *)",
+      "Bash(defaults *)",
+      "Bash(dscl *)",
+      "Bash(networksetup *)",
+      "Bash(ifconfig *)",
+      "Bash(scutil *)",
+    
+      // Prevent sneaky network access
+      "Bash(nc *)",
+      "Bash(netcat *)",
+      "Bash(python -m http*)",
+      "Bash(python3 -m http*)",
+      "Bash(npx serve*)",
+    
+      // Prevent installing global packages
+      "Bash(npm install -g *)",
+      "Bash(npm i -g *)",
+    
+      // Prevent eval/exec shenanigans
+      "Bash(eval *)",
+      "Bash(bash -c *)",
+      "Bash(sh -c *)"
+    ]
+    
+  }
+}
