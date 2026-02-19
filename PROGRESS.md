@@ -1,25 +1,26 @@
 # Perch Build Progress
 
-## Status: PHASE 4 COMPLETE
+## Status: PHASE 5 COMPLETE
 
 ## Completed Tasks
-- [x] 1.1-1.9 Phase 1: Project foundation (package.json, tsconfig, electron-builder, main process, renderer, ESLint, Prettier)
-- [x] 2.1-2.9 Phase 2: Bird sprite system (BirdSprite, BirdStateMachine, BirdAnimator, click handling, 28 state machine tests)
-- [x] 3.1-3.7 Phase 3: Activity monitoring (aggregate keystroke counter, sliding window, state inference, IPC, 37 tests)
-- [x] 4.1 Create rule-based behavior engine (activity→bird state mapping)
-- [x] 4.2 Implement stretch reminder after 45min continuous typing
-- [x] 4.3 Implement hydration reminder every 60min
-- [x] 4.4 Respect dismissal with 15min cooldown
-- [x] 4.5 Time-of-day awareness (sleepy after 10PM, perky after 7AM)
-- [x] 4.6 Write integration tests (30 behavior engine tests)
-- [x] 4.7 Git commit: Phase 4 complete
+- [x] 1.1-1.9 Phase 1: Project foundation
+- [x] 2.1-2.9 Phase 2: Bird sprite system
+- [x] 3.1-3.7 Phase 3: Activity monitoring
+- [x] 4.1-4.7 Phase 4: Behavior engine
+- [x] 5.1 Add system tray icon with context menu (Show/Hide, About, Quit)
+- [x] 5.2 Implement show/hide toggle (Cmd+Shift+P hotkey)
+- [x] 5.3 Remember window position across restarts (electron-store)
+- [x] 5.4 Add smooth opacity transitions when bird appears/disappears
+- [x] 5.5 Click-through except on bird sprite (setIgnoreMouseEvents with forward)
+- [x] 5.6 Handle multi-monitor: position on primary display
+- [x] 5.7 Git commit: Phase 5 complete
 
 ## Blocked Tasks
 (none)
 
 ## Notes
-- 96 total tests passing (28 state machine + 37 activity + 30 behavior + 1 other)
-- Behavior engine uses continuousWorkMinutes from ActivityMonitor for stretch threshold
-- State machine expanded: sleeping→nudging now valid (needed for reminder interruption)
-- Time-of-day check in both handleActivityUpdate and tick()
-- Hydration fires regardless of activity state
+- 96 total tests passing
+- Tray icon is a programmatically generated green circle (template image)
+- Window position persisted via electron-store
+- Opacity transition: 300ms fade in/out on show/hide
+- Behavior engine integrated into renderer with 1s tick interval
