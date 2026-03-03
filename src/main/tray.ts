@@ -1,7 +1,7 @@
 import { Tray, Menu, nativeImage, BrowserWindow, app, dialog } from 'electron';
 
 /**
- * Creates a simple 16x16 tray icon — a small green circle on a transparent background.
+ * Creates a simple 16x16 tray icon — a small orange circle on a transparent background.
  * Uses a raw RGBA buffer to avoid needing an external image file.
  */
 function createTrayIcon(): Electron.NativeImage {
@@ -18,9 +18,9 @@ function createTrayIcon(): Electron.NativeImage {
       const dy = y - centerY + 0.5;
       if (dx * dx + dy * dy <= radius * radius) {
         const offset = (y * size + x) * 4;
-        buffer[offset] = 0x4c; // R
-        buffer[offset + 1] = 0xaf; // G
-        buffer[offset + 2] = 0x50; // B
+        buffer[offset] = 0xff; // R
+        buffer[offset + 1] = 0x8c; // G
+        buffer[offset + 2] = 0x40; // B
         buffer[offset + 3] = 0xff; // A
       }
     }
@@ -63,7 +63,7 @@ export function setupTray(mainWindow: BrowserWindow): Tray {
           type: 'info',
           title: 'About Perch',
           message: `Perch v${app.getVersion()}`,
-          detail: 'A lightweight desktop companion bird that reacts to your work patterns.',
+          detail: 'A lightweight desktop companion cat that reacts to your work patterns.',
           buttons: ['OK'],
         });
       },

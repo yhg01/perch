@@ -19,7 +19,7 @@ setInterval(() => {
   behaviorEngine.tick();
 }, 1000);
 
-// Handle click on the bird — play happy animation or dismiss reminder
+// Handle click on the cat — play happy animation or dismiss reminder
 canvas.addEventListener('click', () => {
   if (behaviorEngine.getActiveReminder()) {
     behaviorEngine.dismiss();
@@ -29,7 +29,7 @@ canvas.addEventListener('click', () => {
   }
 });
 
-// Make the bird area respond to mouse events (not click-through)
+// Make the cat area respond to mouse events (not click-through)
 canvas.addEventListener('mouseenter', () => {
   ipcRenderer.send('set-ignore-mouse', false);
 });
