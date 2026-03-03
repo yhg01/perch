@@ -1,8 +1,8 @@
 // Activity monitoring thresholds
-export const ACTIVE_TYPING_THRESHOLD = 30; // keys per 30s window
-export const LIGHT_ACTIVITY_THRESHOLD = 5; // keys per 30s window
+export const ACTIVE_TYPING_THRESHOLD = 3; // keys per 5s window — triggers on first burst
+export const LIGHT_ACTIVITY_THRESHOLD = 1; // keys per 5s window — any single key
 export const IDLE_DURATION_THRESHOLD = 10_000; // 10 seconds in ms
-export const ACTIVITY_WINDOW_MS = 30_000; // 30-second sliding window
+export const ACTIVITY_WINDOW_MS = 5_000; // 5-second sliding window
 
 // Reminder intervals
 export const STRETCH_REMINDER_MS = 45 * 60 * 1000; // 45 minutes

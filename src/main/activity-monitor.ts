@@ -9,7 +9,7 @@ import { ActivityState, ActivityUpdate } from '../shared/types';
 /**
  * How often (ms) we emit state updates to subscribers.
  */
-const STATE_POLL_INTERVAL_MS = 5_000;
+const STATE_POLL_INTERVAL_MS = 1_000;
 
 /**
  * Duration of idle time (ms) that resets the continuous-work counter.

@@ -56,9 +56,9 @@ describe('ActivityMonitor', () => {
 
     it('should count keystrokes recorded at different times within the window', () => {
       monitor.recordKeystroke();
-      mockNow = 5_000;
+      mockNow = 1_000;
       monitor.recordKeystroke();
-      mockNow = 15_000;
+      mockNow = 2_000;
       monitor.recordKeystroke();
       expect(monitor.getKeystrokesInWindow()).toBe(3);
     });
@@ -90,12 +90,12 @@ describe('ActivityMonitor', () => {
       monitor.recordKeystroke();
       monitor.recordKeystroke();
 
-      // Record 2 more at t=20s
-      mockNow = 20_000;
+      // Record 2 more at t=3s (within window)
+      mockNow = 3_000;
       monitor.recordKeystroke();
       monitor.recordKeystroke();
 
-      // At t=31s, the first 3 should have expired, but the 2 from t=20s remain
+      // Advance past window — first 3 (at t=0) expire, 2 from t=3s remain
       mockNow = ACTIVITY_WINDOW_MS + 1;
       expect(monitor.getKeystrokesInWindow()).toBe(2);
     });
@@ -175,12 +175,12 @@ describe('ActivityMonitor', () => {
     });
 
     it('should return light_activity with few keystrokes when not yet past idle threshold', () => {
-      // A few keystrokes (below light activity threshold)
+      // A couple of keystrokes (above light threshold but below active)
       monitor.recordKeystroke();
       monitor.recordKeystroke();
 
-      // Advance time but not past idle threshold (10s)
-      mockNow = 5_000;
+      // Advance time but not past idle threshold (10s) and within window
+      mockNow = 2_000;
       expect(monitor.getActivityState()).toBe('light_activity');
     });
 
@@ -192,19 +192,16 @@ describe('ActivityMonitor', () => {
         expect(monitor.getActivityState()).toBe('light_activity');
       });
 
-      it('should classify LIGHT_ACTIVITY_THRESHOLD - 1 keystrokes as light_activity before idle threshold', () => {
-        for (let i = 0; i < LIGHT_ACTIVITY_THRESHOLD - 1; i++) {
-          monitor.recordKeystroke();
-        }
+      it('should classify a single keystroke as light_activity before idle threshold', () => {
+        monitor.recordKeystroke();
+        mockNow = 1_000;
+        // 1 keystroke >= LIGHT_ACTIVITY_THRESHOLD (1) → light_activity
         expect(monitor.getActivityState()).toBe('light_activity');
       });
 
-      it('should classify LIGHT_ACTIVITY_THRESHOLD - 1 keystrokes as idle after idle threshold', () => {
-        for (let i = 0; i < LIGHT_ACTIVITY_THRESHOLD - 1; i++) {
-          monitor.recordKeystroke();
-        }
-        // Move past both the sliding window and the idle threshold
-        mockNow = ACTIVITY_WINDOW_MS + IDLE_DURATION_THRESHOLD + 1;
+      it('should classify zero keystrokes as idle after idle threshold', () => {
+        // No keystrokes recorded, advance past idle threshold
+        mockNow = IDLE_DURATION_THRESHOLD + 1;
         expect(monitor.getActivityState()).toBe('idle');
       });
     });
