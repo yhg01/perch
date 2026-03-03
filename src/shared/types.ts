@@ -1,4 +1,4 @@
-export type BirdState = 'idle' | 'sleeping' | 'alert' | 'nudging' | 'happy' | 'sad';
+export type BirdState = 'idle' | 'sleeping' | 'nudging' | 'happy' | 'sad';
 
 export type ActivityState = 'active_typing' | 'light_activity' | 'idle';
 

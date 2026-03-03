@@ -179,8 +179,8 @@ describe('ActivityMonitor', () => {
       monitor.recordKeystroke();
       monitor.recordKeystroke();
 
-      // Advance time but not past idle threshold
-      mockNow = 10_000;
+      // Advance time but not past idle threshold (10s)
+      mockNow = 5_000;
       expect(monitor.getActivityState()).toBe('light_activity');
     });
 

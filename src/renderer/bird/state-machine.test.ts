@@ -32,10 +32,6 @@ describe('BirdStateMachine', () => {
       expect(sm.canTransition('sleeping')).toBe(true);
     });
 
-    it('allows idle -> alert', () => {
-      expect(sm.canTransition('alert')).toBe(true);
-    });
-
     it('allows idle -> nudging', () => {
       expect(sm.canTransition('nudging')).toBe(true);
     });
@@ -62,9 +58,9 @@ describe('BirdStateMachine', () => {
       expect(sm.canTransition('idle')).toBe(true);
     });
 
-    it('allows sleeping -> alert', () => {
+    it('allows sleeping -> happy', () => {
       sm.transition('sleeping', 'test');
-      expect(sm.canTransition('alert')).toBe(true);
+      expect(sm.canTransition('happy')).toBe(true);
     });
 
     it('does not allow sad -> nudging', () => {
@@ -86,10 +82,10 @@ describe('BirdStateMachine', () => {
     });
 
     it('returns false for invalid transitions', () => {
-      sm.transition('sleeping', 'test');
-      const result = sm.transition('happy', 'test');
+      sm.transition('sad', 'test');
+      const result = sm.transition('nudging', 'test');
       expect(result).toBe(false);
-      expect(sm.getCurrentState()).toBe('sleeping');
+      expect(sm.getCurrentState()).toBe('sad');
     });
 
     it('returns false for same-state transitions', () => {
@@ -98,7 +94,7 @@ describe('BirdStateMachine', () => {
     });
 
     it('sets isTransitioning to true on transition', () => {
-      sm.transition('alert', 'test');
+      sm.transition('happy', 'test');
       expect(sm.isTransitioning).toBe(true);
     });
 
@@ -116,12 +112,12 @@ describe('BirdStateMachine', () => {
       const callback = jest.fn();
       sm.onTransition(callback);
 
-      sm.transition('alert', 'test_trigger');
+      sm.transition('happy', 'test_trigger');
 
       expect(callback).toHaveBeenCalledTimes(1);
       expect(callback).toHaveBeenCalledWith({
         from: 'idle',
-        to: 'alert',
+        to: 'happy',
         trigger: 'test_trigger',
       });
     });
@@ -130,10 +126,10 @@ describe('BirdStateMachine', () => {
       const callback = jest.fn();
       sm.onTransition(callback);
 
-      sm.transition('sleeping', 'test');
+      sm.transition('sad', 'test');
       callback.mockClear();
 
-      sm.transition('happy', 'test'); // invalid from sleeping
+      sm.transition('nudging', 'test'); // invalid from sad
 
       expect(callback).not.toHaveBeenCalled();
     });
@@ -142,7 +138,7 @@ describe('BirdStateMachine', () => {
       const callback = jest.fn();
       const unsubscribe = sm.onTransition(callback);
 
-      sm.transition('alert', 'test');
+      sm.transition('happy', 'test');
       expect(callback).toHaveBeenCalledTimes(1);
 
       unsubscribe();
@@ -157,7 +153,7 @@ describe('BirdStateMachine', () => {
       sm.onTransition(cb2);
 
       sm.removeAllListeners();
-      sm.transition('alert', 'test');
+      sm.transition('happy', 'test');
 
       expect(cb1).not.toHaveBeenCalled();
       expect(cb2).not.toHaveBeenCalled();
@@ -202,21 +198,18 @@ describe('BirdStateMachine', () => {
       sm.transition('happy', 'click');
       sm.queueReturn(2000);
 
-      // Manually transition to alert before timer fires
-      sm.transition('alert', 'other');
+      // Manually transition to sleeping before timer fires
+      sm.transition('sleeping', 'other');
 
       jest.advanceTimersByTime(2000);
 
-      // Should stay alert, not go back to idle
-      expect(sm.getCurrentState()).toBe('alert');
+      // Should stay sleeping, not go back to idle
+      expect(sm.getCurrentState()).toBe('sleeping');
     });
   });
 
   describe('multi-step transitions', () => {
-    it('handles idle -> alert -> nudging -> idle flow', () => {
-      expect(sm.transition('alert', 'user_idle')).toBe(true);
-      expect(sm.getCurrentState()).toBe('alert');
-
+    it('handles idle -> nudging -> idle flow', () => {
       expect(sm.transition('nudging', 'reminder')).toBe(true);
       expect(sm.getCurrentState()).toBe('nudging');
 
@@ -224,11 +217,11 @@ describe('BirdStateMachine', () => {
       expect(sm.getCurrentState()).toBe('idle');
     });
 
-    it('handles click happy during alert', () => {
-      sm.transition('alert', 'user_idle');
+    it('handles click happy during nudging', () => {
+      sm.transition('nudging', 'reminder');
       sm.transition('happy', 'user_click');
       expect(sm.getCurrentState()).toBe('happy');
-      expect(sm.getPreviousState()).toBe('alert');
+      expect(sm.getPreviousState()).toBe('nudging');
     });
   });
 });

@@ -1,13 +1,16 @@
 // Activity monitoring thresholds
 export const ACTIVE_TYPING_THRESHOLD = 30; // keys per 30s window
 export const LIGHT_ACTIVITY_THRESHOLD = 5; // keys per 30s window
-export const IDLE_DURATION_THRESHOLD = 120_000; // 2 minutes in ms
+export const IDLE_DURATION_THRESHOLD = 10_000; // 10 seconds in ms
 export const ACTIVITY_WINDOW_MS = 30_000; // 30-second sliding window
 
 // Reminder intervals
 export const STRETCH_REMINDER_MS = 45 * 60 * 1000; // 45 minutes
 export const HYDRATION_REMINDER_MS = 60 * 60 * 1000; // 60 minutes
 export const DISMISS_COOLDOWN_MS = 15 * 60 * 1000; // 15 minutes
+
+// Idle-to-sleep escalation
+export const IDLE_SLEEP_THRESHOLD_MS = 300_000; // 300 seconds (5 min)
 
 // Animation
 export const FRAME_RATE = 60;

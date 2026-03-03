@@ -2,30 +2,34 @@ import { ActivityState, ActivityUpdate, BirdState } from '../../shared/types';
 import {
   DISMISS_COOLDOWN_MS,
   HYDRATION_REMINDER_MS,
-  MORNING_HOUR,
-  SLEEPY_HOUR,
+  IDLE_SLEEP_THRESHOLD_MS,
   STRETCH_REMINDER_MS,
 } from '../../shared/constants';
 import { BirdStateMachine } from './state-machine';
 
 /**
- * Maps an ActivityState to the baseline BirdState the bird should adopt when no
+ * Maps an ActivityState to the baseline BirdState the cat should adopt when no
  * reminder is active.
+ *
+ * - active_typing → happy  (cat is excited while you work)
+ * - light_activity → idle  (cat relaxes)
+ * - idle → nudging         (cat nudges you after 10s of inactivity)
+ *
+ * Idle escalation: after 300s of continuous idle, the cat falls asleep.
  */
 const ACTIVITY_TO_BIRD_STATE: Record<ActivityState, BirdState> = {
-  active_typing: 'sleeping',
+  active_typing: 'happy',
   light_activity: 'idle',
-  idle: 'alert',
+  idle: 'nudging',
 };
 
 /** All reminder types the engine can produce. */
-type ReminderKind = 'stretch' | 'hydration' | 'wind_down';
+type ReminderKind = 'stretch' | 'hydration';
 
 /** Message strings for each reminder kind. */
 const REMINDER_MESSAGES: Record<ReminderKind, string> = {
   stretch: 'Stretch a little?',
   hydration: 'Stay hydrated!',
-  wind_down: 'Time to wind down?',
 };
 
 /** Convert STRETCH_REMINDER_MS to minutes for comparison with update data. */
@@ -50,6 +54,9 @@ export class BehaviorEngine {
   /** Most recently received activity state. */
   private lastActivityState: ActivityState = 'idle';
 
+  /** Timestamp when the idle activity state began (0 = not idle). */
+  private idleStartedAt: number = 0;
+
   constructor(stateMachine: BirdStateMachine, now?: () => number) {
     this.stateMachine = stateMachine;
     this.now = now ?? Date.now;
@@ -65,11 +72,21 @@ export class BehaviorEngine {
    */
   handleActivityUpdate(update: ActivityUpdate): void {
     const { state, continuousWorkMinutes } = update;
+    const prevActivity = this.lastActivityState;
     this.lastActivityState = state;
 
     // Reset stretch tracking when user stops typing.
     if (state !== 'active_typing') {
       this.stretchReminderShownForSession = false;
+    }
+
+    // Track idle duration for sleep escalation.
+    if (state === 'idle') {
+      if (prevActivity !== 'idle' || this.idleStartedAt === 0) {
+        this.idleStartedAt = this.now();
+      }
+    } else {
+      this.idleStartedAt = 0;
     }
 
     // Check for stretch reminder using continuousWorkMinutes from the monitor.
@@ -78,13 +95,17 @@ export class BehaviorEngine {
     if (reminder !== null) {
       this.activateReminder(reminder);
     } else if (this.activeReminder === null) {
-      // Apply time-of-day override or baseline bird state.
-      if (this.isLateNight()) {
-        this.transitionIfNeeded('sleeping', 'time_of_day:sleepy');
-      } else {
-        const targetBirdState = ACTIVITY_TO_BIRD_STATE[state];
-        this.transitionIfNeeded(targetBirdState, `activity:${state}`);
+      // Check idle escalation: 300s of idle → sleeping
+      if (state === 'idle' && this.idleStartedAt > 0) {
+        const idleDuration = this.now() - this.idleStartedAt;
+        if (idleDuration >= IDLE_SLEEP_THRESHOLD_MS) {
+          this.transitionIfNeeded('sleeping', 'idle_sleep');
+          return;
+        }
       }
+
+      const targetBirdState = ACTIVITY_TO_BIRD_STATE[state];
+      this.transitionIfNeeded(targetBirdState, `activity:${state}`);
     }
   }
 
@@ -110,7 +131,7 @@ export class BehaviorEngine {
   }
 
   /**
-   * Periodic tick for time-based conditions (hydration, time-of-day).
+   * Periodic tick for time-based conditions (hydration, idle escalation).
    */
   tick(): void {
     if (this.isInCooldown()) {
@@ -126,9 +147,16 @@ export class BehaviorEngine {
       }
     }
 
-    // Time-of-day: if it's late night and no reminder is active, make bird sleepy.
-    if (this.activeReminder === null && this.isLateNight()) {
-      this.transitionIfNeeded('sleeping', 'time_of_day:sleepy');
+    // Idle escalation: check on every tick if idle long enough to sleep.
+    if (
+      this.activeReminder === null &&
+      this.lastActivityState === 'idle' &&
+      this.idleStartedAt > 0
+    ) {
+      const idleDuration = this.now() - this.idleStartedAt;
+      if (idleDuration >= IDLE_SLEEP_THRESHOLD_MS) {
+        this.transitionIfNeeded('sleeping', 'idle_sleep');
+      }
     }
   }
 
@@ -168,12 +196,6 @@ export class BehaviorEngine {
       return false;
     }
     return this.now() - this.lastDismissAt < DISMISS_COOLDOWN_MS;
-  }
-
-  private isLateNight(): boolean {
-    const date = new Date(this.now());
-    const hour = date.getHours();
-    return hour >= SLEEPY_HOUR || hour < MORNING_HOUR;
   }
 
   private transitionIfNeeded(to: BirdState, trigger: string): void {
