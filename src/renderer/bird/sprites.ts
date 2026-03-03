@@ -3,9 +3,13 @@ import { BirdState } from '../../shared/types';
 
 const SPRITE_DIR = path.join(__dirname, '..', '..', '..', 'assets', 'sprites');
 
-/** Background type for each sprite image — used for transparency processing. */
-const SPRITE_CONFIG: Record<BirdState, { file: string; bgType: 'black' | 'white' }> = {
-  idle: { file: 'idle.webp', bgType: 'white' },
+/**
+ * Background type for each sprite image:
+ * - 'black': solid black background that needs removal
+ * - 'none': image already has proper alpha transparency
+ */
+const SPRITE_CONFIG: Record<BirdState, { file: string; bgType: 'black' | 'none' }> = {
+  idle: { file: 'idle.webp', bgType: 'none' },
   sleeping: { file: 'sleeping.webp', bgType: 'black' },
   nudging: { file: 'nudging.webp', bgType: 'black' },
   happy: { file: 'happy.webp', bgType: 'black' },
@@ -40,15 +44,24 @@ export class BirdSprite {
   }
 
   /**
-   * Draw the loaded image onto an offscreen canvas and replace the background
-   * color (black or white) with transparency.
+   * Draw the loaded image onto an offscreen canvas. For black-background
+   * images, replace near-black pixels with transparency. Images that already
+   * have an alpha channel ('none') are used as-is.
+   *
+   * Black background pixels are brightness 0-5. Cat dark outlines start at
+   * brightness ~20+. We use a tight threshold (< 10 fully transparent,
+   * 10-25 partial) to avoid eating into outlines and shadows.
    */
-  private processImage(img: HTMLImageElement, bgType: 'black' | 'white'): HTMLCanvasElement {
+  private processImage(img: HTMLImageElement, bgType: 'black' | 'none'): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
     canvas.width = img.width;
     canvas.height = img.height;
     const ctx = canvas.getContext('2d')!;
     ctx.drawImage(img, 0, 0);
+
+    if (bgType === 'none') {
+      return canvas;
+    }
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
@@ -59,18 +72,10 @@ export class BirdSprite {
       const b = data[i + 2];
       const brightness = r + g + b;
 
-      if (bgType === 'black') {
-        if (brightness < 60) {
-          data[i + 3] = 0;
-        } else if (brightness < 120) {
-          data[i + 3] = Math.round(((brightness - 60) / 60) * 255);
-        }
-      } else {
-        if (brightness > 700) {
-          data[i + 3] = 0;
-        } else if (brightness > 600) {
-          data[i + 3] = Math.round(((700 - brightness) / 100) * 255);
-        }
+      if (brightness < 10) {
+        data[i + 3] = 0;
+      } else if (brightness < 25) {
+        data[i + 3] = Math.round(((brightness - 10) / 15) * 255);
       }
     }
 
